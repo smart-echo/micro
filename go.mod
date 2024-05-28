@@ -29,7 +29,10 @@ require (
 	google.golang.org/protobuf v1.34.1
 )
 
-require github.com/gorilla/websocket v1.5.1
+require (
+	github.com/gorilla/websocket v1.5.1
+	google.golang.org/genproto/googleapis/api v0.0.0-20230711160842-782d3b101e98
+)
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
@@ -73,6 +76,7 @@ require (
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	golang.org/x/tools v0.20.0 // indirect
+	google.golang.org/genproto v0.0.0-20230711160842-782d3b101e98 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
