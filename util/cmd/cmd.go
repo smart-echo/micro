@@ -19,6 +19,7 @@ import (
 	"github.com/smart-echo/micro/logger"
 	"github.com/smart-echo/micro/registry"
 	"github.com/smart-echo/micro/runtime"
+	"github.com/smart-echo/micro/runtime/local"
 	"github.com/smart-echo/micro/selector"
 	"github.com/smart-echo/micro/server"
 	"github.com/smart-echo/micro/store"
@@ -153,9 +154,9 @@ var (
 		},
 		&cli.StringFlag{
 			Name:    "runtime_source",
-			Usage:   "Runtime source for building and running services e.g github.com/micro/service",
+			Usage:   "Runtime source for building and running services e.g github.com/smart-echo/services",
 			EnvVars: []string{"MICRO_RUNTIME_SOURCE"},
-			Value:   "github.com/micro/services",
+			Value:   "github.com/smart-echo/services",
 		},
 		&cli.StringFlag{
 			Name:    "selector",
@@ -275,6 +276,10 @@ func init() {
 }
 
 func newCmd(opts ...Option) Cmd {
+	// use the local runtime, note: the local runtime is designed to run source code directly so
+	// the runtime builder should NOT be set when using this implementation
+	runtime.DefaultRuntime = local.NewRuntime()
+
 	options := Options{
 		Auth:      &auth.DefaultAuth,
 		Broker:    &broker.DefaultBroker,
@@ -365,7 +370,7 @@ func (c *cmd) Before(ctx *cli.Context) error {
 	if name := ctx.String("store"); len(name) > 0 {
 		s, ok := c.opts.Stores[name]
 		if !ok {
-			return fmt.Errorf("Unsupported store: %s", name)
+			return fmt.Errorf("unsupported store: %s", name)
 		}
 
 		*c.opts.Store = s(store.WithClient(*c.opts.Client))
@@ -375,7 +380,7 @@ func (c *cmd) Before(ctx *cli.Context) error {
 	if name := ctx.String("runtime"); len(name) > 0 {
 		r, ok := c.opts.Runtimes[name]
 		if !ok {
-			return fmt.Errorf("Unsupported runtime: %s", name)
+			return fmt.Errorf("unsupported runtime: %s", name)
 		}
 
 		*c.opts.Runtime = r(runtime.WithClient(*c.opts.Client))
@@ -385,7 +390,7 @@ func (c *cmd) Before(ctx *cli.Context) error {
 	if name := ctx.String("tracer"); len(name) > 0 {
 		r, ok := c.opts.Tracers[name]
 		if !ok {
-			return fmt.Errorf("Unsupported tracer: %s", name)
+			return fmt.Errorf("unsupported tracer: %s", name)
 		}
 
 		*c.opts.Tracer = r()
@@ -411,7 +416,7 @@ func (c *cmd) Before(ctx *cli.Context) error {
 	if name := ctx.String("auth"); len(name) > 0 {
 		r, ok := c.opts.Auths[name]
 		if !ok {
-			return fmt.Errorf("Unsupported auth: %s", name)
+			return fmt.Errorf("unsupported auth: %s", name)
 		}
 
 		*c.opts.Auth = r(authOpts...)
@@ -443,7 +448,7 @@ func (c *cmd) Before(ctx *cli.Context) error {
 	if name := ctx.String("profile"); len(name) > 0 {
 		p, ok := c.opts.Profiles[name]
 		if !ok {
-			return fmt.Errorf("Unsupported profile: %s", name)
+			return fmt.Errorf("unsupported profile: %s", name)
 		}
 
 		*c.opts.Profile = p()

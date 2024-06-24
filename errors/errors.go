@@ -7,18 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	pb "github.com/smart-echo/micro/proto/errors/v1"
 )
-
-//go:generate protoc -I. --go_out=paths=source_relative:. errors.proto
-
-func (e *Error) Error() string {
-	b, _ := json.Marshal(e)
-	return string(b)
-}
 
 // New generates a custom error.
 func New(id, detail string, code int32) error {
-	return &Error{
+	return &pb.Error{
 		Id:     id,
 		Code:   code,
 		Detail: detail,
@@ -28,8 +22,8 @@ func New(id, detail string, code int32) error {
 
 // Parse tries to parse a JSON string into an error. If that
 // fails, it will set the given string as the error detail.
-func Parse(err string) *Error {
-	e := new(Error)
+func Parse(err string) *pb.Error {
+	e := new(pb.Error)
 	errr := json.Unmarshal([]byte(err), e)
 	if errr != nil {
 		e.Detail = err
@@ -39,7 +33,7 @@ func Parse(err string) *Error {
 
 // BadRequest generates a 400 error.
 func BadRequest(id, format string, a ...interface{}) error {
-	return &Error{
+	return &pb.Error{
 		Id:     id,
 		Code:   400,
 		Detail: fmt.Sprintf(format, a...),
@@ -49,7 +43,7 @@ func BadRequest(id, format string, a ...interface{}) error {
 
 // Unauthorized generates a 401 error.
 func Unauthorized(id, format string, a ...interface{}) error {
-	return &Error{
+	return &pb.Error{
 		Id:     id,
 		Code:   401,
 		Detail: fmt.Sprintf(format, a...),
@@ -59,7 +53,7 @@ func Unauthorized(id, format string, a ...interface{}) error {
 
 // Forbidden generates a 403 error.
 func Forbidden(id, format string, a ...interface{}) error {
-	return &Error{
+	return &pb.Error{
 		Id:     id,
 		Code:   403,
 		Detail: fmt.Sprintf(format, a...),
@@ -69,7 +63,7 @@ func Forbidden(id, format string, a ...interface{}) error {
 
 // NotFound generates a 404 error.
 func NotFound(id, format string, a ...interface{}) error {
-	return &Error{
+	return &pb.Error{
 		Id:     id,
 		Code:   404,
 		Detail: fmt.Sprintf(format, a...),
@@ -79,7 +73,7 @@ func NotFound(id, format string, a ...interface{}) error {
 
 // MethodNotAllowed generates a 405 error.
 func MethodNotAllowed(id, format string, a ...interface{}) error {
-	return &Error{
+	return &pb.Error{
 		Id:     id,
 		Code:   405,
 		Detail: fmt.Sprintf(format, a...),
@@ -89,7 +83,7 @@ func MethodNotAllowed(id, format string, a ...interface{}) error {
 
 // Timeout generates a 408 error.
 func Timeout(id, format string, a ...interface{}) error {
-	return &Error{
+	return &pb.Error{
 		Id:     id,
 		Code:   408,
 		Detail: fmt.Sprintf(format, a...),
@@ -99,7 +93,7 @@ func Timeout(id, format string, a ...interface{}) error {
 
 // Conflict generates a 409 error.
 func Conflict(id, format string, a ...interface{}) error {
-	return &Error{
+	return &pb.Error{
 		Id:     id,
 		Code:   409,
 		Detail: fmt.Sprintf(format, a...),
@@ -109,7 +103,7 @@ func Conflict(id, format string, a ...interface{}) error {
 
 // InternalServerError generates a 500 error.
 func InternalServerError(id, format string, a ...interface{}) error {
-	return &Error{
+	return &pb.Error{
 		Id:     id,
 		Code:   500,
 		Detail: fmt.Sprintf(format, a...),
@@ -119,8 +113,8 @@ func InternalServerError(id, format string, a ...interface{}) error {
 
 // Equal tries to compare errors.
 func Equal(err1 error, err2 error) bool {
-	verr1, ok1 := err1.(*Error)
-	verr2, ok2 := err2.(*Error)
+	verr1, ok1 := err1.(*pb.Error)
+	verr2, ok2 := err2.(*pb.Error)
 
 	if ok1 != ok2 {
 		return false
@@ -138,11 +132,11 @@ func Equal(err1 error, err2 error) bool {
 }
 
 // FromError try to convert go error to *Error.
-func FromError(err error) *Error {
+func FromError(err error) *pb.Error {
 	if err == nil {
 		return nil
 	}
-	if verr, ok := err.(*Error); ok && verr != nil {
+	if verr, ok := err.(*pb.Error); ok && verr != nil {
 		return verr
 	}
 
@@ -150,32 +144,19 @@ func FromError(err error) *Error {
 }
 
 // As finds the first error in err's chain that matches *Error.
-func As(err error) (*Error, bool) {
+func As(err error) (*pb.Error, bool) {
 	if err == nil {
 		return nil, false
 	}
-	var merr *Error
+	var merr *pb.Error
 	if errors.As(err, &merr) {
 		return merr, true
 	}
 	return nil, false
 }
 
-func NewMultiError() *MultiError {
-	return &MultiError{
-		Errors: make([]*Error, 0),
+func NewMultiError() *pb.MultiError {
+	return &pb.MultiError{
+		Errors: make([]*pb.Error, 0),
 	}
-}
-
-func (e *MultiError) Append(err ...*Error) {
-	e.Errors = append(e.Errors, err...)
-}
-
-func (e *MultiError) HasErrors() bool {
-	return len(e.Errors) > 0
-}
-
-func (e *MultiError) Error() string {
-	b, _ := json.Marshal(e)
-	return string(b)
 }

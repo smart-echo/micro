@@ -9,9 +9,9 @@ import (
 
 	"github.com/smart-echo/micro/client"
 	"github.com/smart-echo/micro/debug/log"
-	proto "github.com/smart-echo/micro/debug/proto"
 	"github.com/smart-echo/micro/debug/stats"
 	"github.com/smart-echo/micro/debug/trace"
+	pb "github.com/smart-echo/micro/proto/debug/v1"
 )
 
 // NewHandler returns an instance of the Debug Handler.
@@ -23,11 +23,11 @@ func NewHandler(c client.Client) *Debug {
 	}
 }
 
-var _ proto.DebugHandler = (*Debug)(nil)
+var _ pb.DebugHandler = (*Debug)(nil)
 
 type Debug struct {
 	// must honor the debug handler
-	proto.DebugHandler
+	pb.DebugHandler
 	// the logger for retrieving logs
 	log log.Log
 	// the stats collector
@@ -36,12 +36,12 @@ type Debug struct {
 	trace trace.Tracer
 }
 
-func (d *Debug) Health(ctx context.Context, req *proto.HealthRequest, rsp *proto.HealthResponse) error {
+func (d *Debug) Health(ctx context.Context, req *pb.HealthRequest, rsp *pb.HealthResponse) error {
 	rsp.Status = "ok"
 	return nil
 }
 
-func (d *Debug) MessageBus(ctx context.Context, stream proto.Debug_MessageBusStream) error {
+func (d *Debug) MessageBus(ctx context.Context, stream pb.Debug_MessageBusStream) error {
 	for {
 		_, err := stream.Recv()
 		if errors.Is(err, io.EOF) {
@@ -50,7 +50,7 @@ func (d *Debug) MessageBus(ctx context.Context, stream proto.Debug_MessageBusStr
 			return err
 		}
 
-		rsp := proto.BusMsg{
+		rsp := pb.BusMsg{
 			Msg: "Request received!",
 		}
 
@@ -60,7 +60,7 @@ func (d *Debug) MessageBus(ctx context.Context, stream proto.Debug_MessageBusStr
 	}
 }
 
-func (d *Debug) Stats(ctx context.Context, req *proto.StatsRequest, rsp *proto.StatsResponse) error {
+func (d *Debug) Stats(ctx context.Context, req *pb.StatsRequest, rsp *pb.StatsResponse) error {
 	stats, err := d.stats.Read()
 	if err != nil {
 		return err
@@ -83,23 +83,23 @@ func (d *Debug) Stats(ctx context.Context, req *proto.StatsRequest, rsp *proto.S
 	return nil
 }
 
-func (d *Debug) Trace(ctx context.Context, req *proto.TraceRequest, rsp *proto.TraceResponse) error {
+func (d *Debug) Trace(ctx context.Context, req *pb.TraceRequest, rsp *pb.TraceResponse) error {
 	traces, err := d.trace.Read(trace.ReadTrace(req.Id))
 	if err != nil {
 		return err
 	}
 
 	for _, t := range traces {
-		var typ proto.SpanType
+		var typ pb.SpanType
 
 		switch t.Type {
 		case trace.SpanTypeRequestInbound:
-			typ = proto.SpanType_INBOUND
+			typ = pb.SpanType_INBOUND
 		case trace.SpanTypeRequestOutbound:
-			typ = proto.SpanType_OUTBOUND
+			typ = pb.SpanType_OUTBOUND
 		}
 
-		rsp.Spans = append(rsp.Spans, &proto.Span{
+		rsp.Spans = append(rsp.Spans, &pb.Span{
 			Trace:    t.Trace,
 			Id:       t.Id,
 			Parent:   t.Parent,
@@ -114,7 +114,7 @@ func (d *Debug) Trace(ctx context.Context, req *proto.TraceRequest, rsp *proto.T
 	return nil
 }
 
-func (d *Debug) Log(ctx context.Context, req *proto.LogRequest, stream proto.Debug_LogStream) error {
+func (d *Debug) Log(ctx context.Context, req *pb.LogRequest, stream pb.Debug_LogStream) error {
 
 	var options []log.ReadOption
 
@@ -147,7 +147,7 @@ func (d *Debug) Log(ctx context.Context, req *proto.LogRequest, stream proto.Deb
 				metadata[k] = v
 			}
 			// send record
-			if err := stream.Send(&proto.Record{
+			if err := stream.Send(&pb.Record{
 				Timestamp: record.Timestamp.Unix(),
 				Message:   record.Message.(string),
 				Metadata:  metadata,
@@ -174,7 +174,7 @@ func (d *Debug) Log(ctx context.Context, req *proto.LogRequest, stream proto.Deb
 			metadata[k] = v
 		}
 		// send record
-		if err := stream.Send(&proto.Record{
+		if err := stream.Send(&pb.Record{
 			Timestamp: record.Timestamp.Unix(),
 			Message:   record.Message.(string),
 			Metadata:  metadata,

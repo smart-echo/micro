@@ -8,13 +8,13 @@ import (
 
 	"github.com/smart-echo/micro/errors"
 	log "github.com/smart-echo/micro/logger"
+	pb "github.com/smart-echo/micro/proto/file/v1"
 	"github.com/smart-echo/micro/server"
-	proto "github.com/smart-echo/micro/util/file/proto"
 	"golang.org/x/net/context"
 )
 
 // NewHandler is a handler that can be registered with a micro Server.
-func NewHandler(readDir string) proto.FileHandler {
+func NewHandler(readDir string) pb.FileHandler {
 	return &handler{
 		readDir: readDir,
 		session: &session{
@@ -26,7 +26,7 @@ func NewHandler(readDir string) proto.FileHandler {
 
 // RegisterHandler is a convenience method for registering a handler.
 func RegisterHandler(s server.Server, readDir string) {
-	proto.RegisterFileHandler(s, NewHandler(readDir))
+	pb.RegisterFileHandler(s, NewHandler(readDir))
 }
 
 type handler struct {
@@ -35,7 +35,7 @@ type handler struct {
 	readDir string
 }
 
-func (h *handler) Open(ctx context.Context, req *proto.OpenRequest, rsp *proto.OpenResponse) error {
+func (h *handler) Open(ctx context.Context, req *pb.OpenRequest, rsp *pb.OpenResponse) error {
 	path := filepath.Join(h.readDir, req.Filename)
 	flags := os.O_CREATE | os.O_RDWR
 	if req.GetTruncate() {
@@ -54,13 +54,13 @@ func (h *handler) Open(ctx context.Context, req *proto.OpenRequest, rsp *proto.O
 	return nil
 }
 
-func (h *handler) Close(ctx context.Context, req *proto.CloseRequest, rsp *proto.CloseResponse) error {
+func (h *handler) Close(ctx context.Context, req *pb.CloseRequest, rsp *pb.CloseResponse) error {
 	h.session.Delete(req.Id)
 	h.logger.Logf(log.DebugLevel, "Close sessionId=%d", req.Id)
 	return nil
 }
 
-func (h *handler) Stat(ctx context.Context, req *proto.StatRequest, rsp *proto.StatResponse) error {
+func (h *handler) Stat(ctx context.Context, req *pb.StatRequest, rsp *pb.StatResponse) error {
 	path := filepath.Join(h.readDir, req.Filename)
 	fi, err := os.Stat(path)
 	if os.IsNotExist(err) {
@@ -80,7 +80,7 @@ func (h *handler) Stat(ctx context.Context, req *proto.StatRequest, rsp *proto.S
 	return nil
 }
 
-func (h *handler) Read(ctx context.Context, req *proto.ReadRequest, rsp *proto.ReadResponse) error {
+func (h *handler) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResponse) error {
 	file := h.session.Get(req.Id)
 	if file == nil {
 		return errors.InternalServerError("go.micro.srv.file", "You must call open first.")
@@ -104,7 +104,7 @@ func (h *handler) Read(ctx context.Context, req *proto.ReadRequest, rsp *proto.R
 	return nil
 }
 
-func (h *handler) Write(ctx context.Context, req *proto.WriteRequest, rsp *proto.WriteResponse) error {
+func (h *handler) Write(ctx context.Context, req *pb.WriteRequest, rsp *pb.WriteResponse) error {
 	file := h.session.Get(req.Id)
 	if file == nil {
 		return errors.InternalServerError("go.micro.srv.file", "You must call open first.")

@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package micro.runtime;
+
+message Service {
+  // name of the service
+  string name = 1;
+  // version of the service
+  string version = 2;
+  // git url of the source
+  string source = 3;
+  // service metadata
+  map<string, string> metadata = 4;
+  // status of the service
+  int32 status = 5;
+}
+
+message Namespace {
+  // name of the namespace
+  string name = 1;
+}
+
+message NetworkPolicy {
+  // the labels allowed ingress by this policy
+  map<string, string> allowedlabels = 1;
+  // name of the network policy
+  string name = 2;
+  // namespace the network policy belongs to
+  string namespace = 3;
+}
+
+message ResourceQuota {
+  // name of the resource quota
+  string name = 1;
+  // namespace the resource quota belongs to
+  string namespace = 2;
+  // resource requests
+  Resources requests = 3;
+  // resource limits
+  Resources limits = 4;
+}
+
+message Resources {
+  int32 Memory = 1; // in MiB
+  int32 CPU = 2; // in millicores
+  int32 EphemeralStorage = 3; // in MiB
+}

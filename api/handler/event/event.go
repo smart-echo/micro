@@ -12,8 +12,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/oxtoacart/bpool"
+  
 	"github.com/smart-echo/micro/api/handler"
-	proto "github.com/smart-echo/micro/api/proto"
+	pb "github.com/smart-echo/micro/proto/api/v1"
 	"github.com/smart-echo/micro/util/ctx"
 )
 
@@ -84,11 +85,11 @@ func (e *event) ServeHTTP(rsp http.ResponseWriter, req *http.Request) {
 	topic, action := evRoute(e.opts.Namespace, req.URL.Path)
 
 	// create event
-	event := &proto.Event{
+	event := &pb.Event{
 		Name: action,
 		// TODO: dedupe event
 		Id:        fmt.Sprintf("%s-%s-%s", topic, action, uuid.New().String()),
-		Header:    make(map[string]*proto.Pair),
+		Header:    make(map[string]*pb.Pair),
 		Timestamp: time.Now().Unix(),
 	}
 
@@ -96,7 +97,7 @@ func (e *event) ServeHTTP(rsp http.ResponseWriter, req *http.Request) {
 	for key, vals := range req.Header {
 		header, ok := event.Header[key]
 		if !ok {
-			header = &proto.Pair{
+			header = &pb.Pair{
 				Key: key,
 			}
 			event.Header[key] = header

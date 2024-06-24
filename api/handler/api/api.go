@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/smart-echo/micro/api/handler"
-	api "github.com/smart-echo/micro/api/proto"
+	pb "github.com/smart-echo/micro/proto/api/v1"
 	"github.com/smart-echo/micro/api/router"
 	"github.com/smart-echo/micro/client"
 	"github.com/smart-echo/micro/errors"
@@ -72,7 +72,7 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// create request and response
 	c := a.opts.Client
 	req := c.NewRequest(service.Service, service.Endpoint.Name, request)
-	rsp := &api.Response{}
+	rsp := &pb.Response{}
 
 	// create the context from headers
 	cx := ctx.FromRequest(r)

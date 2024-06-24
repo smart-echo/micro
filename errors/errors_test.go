@@ -4,6 +4,8 @@ import (
 	er "errors"
 	"net/http"
 	"testing"
+
+	pb "github.com/smart-echo/micro/proto/errors/v1"
 )
 
 func TestFromError(t *testing.T) {
@@ -38,7 +40,7 @@ func TestEqual(t *testing.T) {
 }
 
 func TestErrors(t *testing.T) {
-	testData := []*Error{
+	testData := []*pb.Error{
 		{
 			Id:     "test",
 			Code:   500,
@@ -100,7 +102,7 @@ func TestAs(t *testing.T) {
 
 func TestAppend(t *testing.T) {
 	mError := NewMultiError()
-	testData := []*Error{
+	testData := []*pb.Error{
 		{
 			Id:     "test1",
 			Code:   500,
@@ -130,7 +132,7 @@ func TestAppend(t *testing.T) {
 
 func TestHasErrors(t *testing.T) {
 	mError := NewMultiError()
-	testData := []*Error{
+	testData := []*pb.Error{
 		{
 			Id:     "test1",
 			Code:   500,
