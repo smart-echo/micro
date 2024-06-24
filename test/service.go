@@ -1,4 +1,4 @@
-// Package test implements a testing framwork, and provides default tests.
+// Package test implements a testing framework, and provides default tests.
 package test
 
 import (
@@ -10,13 +10,13 @@ import (
 
 	"github.com/pkg/errors"
 
-	proto "github.com/smart-echo/micro/test/proto"
+	pb "github.com/smart-echo/micro/proto/test/v1"
 
 	"github.com/smart-echo/micro"
 	"github.com/smart-echo/micro/client"
 	"github.com/smart-echo/micro/debug/handler"
 
-	pb "github.com/smart-echo/micro/debug/proto"
+	debug "github.com/smart-echo/micro/proto/debug/v1"
 )
 
 var (
@@ -49,11 +49,11 @@ type ServiceTestConfig struct {
 	// It takes in a list of options, which by default will Context and an
 	// AfterStart with channel to signal when the service has been started.
 	NewService func(name string, opts ...micro.Option) (micro.Service, error)
-	// Parallel is the number of prallell routines to use for the tests.
+	// Parallel is the number of parallel routines to use for the tests.
 	Parallel []int
 	// Sequential is the number of sequential requests to send per parallel process.
 	Sequential []int
-	// Streams is the nummber of streaming messages to send over the stream per routine.
+	// Streams is the number of streaming messages to send over the stream per routine.
 	Streams []int
 	// PubSub is the number of times to publish messages to the broker per routine.
 	PubSub []int
@@ -78,7 +78,7 @@ func (stc *ServiceTestConfig) Run(b *testing.B) {
 	stc.prepBench(b, "pubsub", stc.runBrokerTest, stc.PubSub)
 }
 
-// prepBench will prepare the benmark by setting the right parameters,
+// prepBench will prepare the benchmark by setting the right parameters,
 // and invoking the test.
 func (stc *ServiceTestConfig) prepBench(b *testing.B, tName string, test parTest, seq []int) {
 	par := stc.Parallel
@@ -127,7 +127,7 @@ func (stc *ServiceTestConfig) runParSeqTest(name string, c client.Client, p, s i
 }
 
 // Handle is used as a test handler.
-func (stc *ServiceTestConfig) Handle(ctx context.Context, msg *proto.Request) error {
+func (stc *ServiceTestConfig) Handle(ctx context.Context, msg *pb.Request) error {
 	stc.mu.Lock()
 	stc.msgCount++
 	stc.mu.Unlock()
@@ -136,7 +136,7 @@ func (stc *ServiceTestConfig) Handle(ctx context.Context, msg *proto.Request) er
 }
 
 // HandleError is used as a test handler.
-func (stc *ServiceTestConfig) HandleError(ctx context.Context, msg *proto.Request) error {
+func (stc *ServiceTestConfig) HandleError(ctx context.Context, msg *pb.Request) error {
 	return errors.New("dummy error")
 }
 
@@ -146,13 +146,13 @@ func (stc *ServiceTestConfig) runBrokerTest(name string, c client.Client, p, s i
 
 	testParallel(p, func() {
 		for z := 0; z < s; z++ {
-			msg := pb.BusMsg{Msg: "Hello from broker!"}
+			msg := debug.BusMsg{Msg: "Hello from broker!"}
 			if err := c.Publish(context.Background(), c.NewMessage(testTopic, &msg)); err != nil {
 				errChan <- errors.Wrap(err, "failed to publish message to broker")
 				return
 			}
 
-			msg = pb.BusMsg{Msg: "Some message that will error"}
+			msg = debug.BusMsg{Msg: "Some message that will error"}
 			if err := c.Publish(context.Background(), c.NewMessage(errorTopic, &msg)); err == nil {
 				errChan <- errors.New("Publish is supposed to return an error, but got no error")
 				return
@@ -170,7 +170,7 @@ func (stc *ServiceTestConfig) runBrokerTest(name string, c client.Client, p, s i
 func (stc *ServiceTestConfig) runParStreamTest(name string, c client.Client, p, s int, errChan chan error) {
 	testParallel(p, func() {
 		// Create a client service
-		srv := pb.NewDebugService(name, c)
+		srv := debug.NewDebugService(name, c)
 
 		// Establish a connection to server over which we start streaming
 		bus, err := srv.MessageBus(context.Background())
@@ -181,7 +181,7 @@ func (stc *ServiceTestConfig) runParStreamTest(name string, c client.Client, p, 
 
 		// Start streaming requests
 		for z := 0; z < s; z++ {
-			if err := bus.Send(&pb.BusMsg{Msg: "Hack the world!"}); err != nil {
+			if err := bus.Send(&debug.BusMsg{Msg: "Hack the world!"}); err != nil {
 				errChan <- errors.Wrap(err, "failed to send to  stream")
 				return
 			}
@@ -194,7 +194,7 @@ func (stc *ServiceTestConfig) runParStreamTest(name string, c client.Client, p, 
 
 			expected := "Request received!"
 			if msg.Msg != expected {
-				errChan <- fmt.Errorf("stream returned unexpected mesage. Expected '%s', but got '%s'", expected, msg.Msg)
+				errChan <- fmt.Errorf("stream returned unexpected message. Expected '%s', but got '%s'", expected, msg.Msg)
 				return
 			}
 		}
@@ -238,7 +238,7 @@ func (stc *ServiceTestConfig) runBench(b *testing.B, name string, test testFunc)
 	}
 
 	// Register handler
-	if err := pb.RegisterDebugHandler(service.Server(), handler.NewHandler(service.Client())); err != nil {
+	if err := debug.RegisterDebugHandler(service.Server(), handler.NewHandler(service.Client())); err != nil {
 		b.Fatalf("failed to register handler during initial service setup: %v", err)
 	}
 
@@ -332,7 +332,7 @@ func RunBenchmark(b *testing.B, name string, service micro.Service, test testFun
 		}
 
 		// Start benchmark
-		b.Logf("[%s] Starting benchtest", name)
+		b.Logf("[%s] Starting bench test", name)
 		b.ResetTimer()
 		b.StartTimer()
 
@@ -353,7 +353,7 @@ func RunBenchmark(b *testing.B, name string, service micro.Service, test testFun
 
 // testParallel will run the test function in p parallel routines.
 func testParallel(p int, test func()) {
-	// Waitgroup to wait for requests to finish
+	// WaitGroup to wait for requests to finish
 	wg := sync.WaitGroup{}
 
 	// For concurrency
@@ -378,10 +378,10 @@ func testRequest(ctx context.Context, c client.Client, name string) error {
 	req := c.NewRequest(
 		name,
 		"Debug.Health",
-		new(pb.HealthRequest),
+		new(debug.HealthRequest),
 	)
 
-	rsp := new(pb.HealthResponse)
+	rsp := new(debug.HealthResponse)
 
 	if err := c.Call(ctx, req, rsp); err != nil {
 		return err

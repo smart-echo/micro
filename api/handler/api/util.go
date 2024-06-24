@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/oxtoacart/bpool"
-	api "github.com/smart-echo/micro/api/proto"
+	pb "github.com/smart-echo/micro/proto/api/v1"
 	"github.com/smart-echo/micro/registry"
 	"github.com/smart-echo/micro/selector"
 )
@@ -18,17 +18,17 @@ var (
 	bufferPool = bpool.NewSizedBufferPool(1024, 8)
 )
 
-func requestToProto(r *http.Request) (*api.Request, error) {
+func requestToProto(r *http.Request) (*pb.Request, error) {
 	if err := r.ParseForm(); err != nil {
 		return nil, fmt.Errorf("Error parsing form: %w", err)
 	}
 
-	req := &api.Request{
+	req := &pb.Request{
 		Path:   r.URL.Path,
 		Method: r.Method,
-		Header: make(map[string]*api.Pair),
-		Get:    make(map[string]*api.Pair),
-		Post:   make(map[string]*api.Pair),
+		Header: make(map[string]*pb.Pair),
+		Get:    make(map[string]*pb.Pair),
+		Post:   make(map[string]*pb.Pair),
 		Url:    r.URL.String(),
 	}
 
@@ -62,14 +62,14 @@ func requestToProto(r *http.Request) (*api.Request, error) {
 		}
 
 		// Set the header
-		req.Header["X-Forwarded-For"] = &api.Pair{
+		req.Header["X-Forwarded-For"] = &pb.Pair{
 			Key:    "X-Forwarded-For",
 			Values: []string{ip},
 		}
 	}
 
 	// Host is stripped from net/http Headers so let's add it
-	req.Header["Host"] = &api.Pair{
+	req.Header["Host"] = &pb.Pair{
 		Key:    "Host",
 		Values: []string{r.Host},
 	}
@@ -78,7 +78,7 @@ func requestToProto(r *http.Request) (*api.Request, error) {
 	for key, vals := range r.URL.Query() {
 		header, ok := req.Get[key]
 		if !ok {
-			header = &api.Pair{
+			header = &pb.Pair{
 				Key: key,
 			}
 			req.Get[key] = header
@@ -91,7 +91,7 @@ func requestToProto(r *http.Request) (*api.Request, error) {
 	for key, vals := range r.PostForm {
 		header, ok := req.Post[key]
 		if !ok {
-			header = &api.Pair{
+			header = &pb.Pair{
 				Key: key,
 			}
 			req.Post[key] = header
@@ -103,7 +103,7 @@ func requestToProto(r *http.Request) (*api.Request, error) {
 	for key, vals := range r.Header {
 		header, ok := req.Header[key]
 		if !ok {
-			header = &api.Pair{
+			header = &pb.Pair{
 				Key: key,
 			}
 			req.Header[key] = header

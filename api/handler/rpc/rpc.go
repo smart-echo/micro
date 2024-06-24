@@ -12,10 +12,10 @@ import (
 	jsonpatch "github.com/evanphx/json-patch/v5"
 	"github.com/oxtoacart/bpool"
 	"github.com/smart-echo/micro/api/handler"
-	"github.com/smart-echo/micro/api/internal/proto"
 	"github.com/smart-echo/micro/api/router"
 	"github.com/smart-echo/micro/client"
 	"github.com/smart-echo/micro/codec"
+	"github.com/smart-echo/micro/codec/bytes"
 	"github.com/smart-echo/micro/codec/jsonrpc"
 	"github.com/smart-echo/micro/codec/protorpc"
 	"github.com/smart-echo/micro/errors"
@@ -172,14 +172,14 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch {
 	// proto codecs
 	case hasCodec(contentType, protoCodecs):
-		request := &proto.Message{}
+		var request *bytes.Frame
 		// if the extracted payload isn't empty lets use it
 		if len(br) > 0 {
-			request = proto.NewMessage(br)
+			request = &bytes.Frame{Data: br}
 		}
 
 		// create request/response
-		response := &proto.Message{}
+		var response *bytes.Frame
 
 		req := myClient.NewRequest(
 			service.Service,
@@ -196,17 +196,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			return
 		}
-
-		// marshall response
-		rsp, err = response.Marshal()
-		if err != nil {
-			if werr := writeError(w, r, err); werr != nil {
-				logger.Log(log.ErrorLevel, werr)
-			}
-
-			return
-		}
-
+		rsp = response.Data
 	default:
 		// if json codec is not present set to json
 		if !hasCodec(contentType, jsonCodecs) {
@@ -309,12 +299,12 @@ func requestPayload(r *http.Request) ([]byte, error) {
 			return nil, err
 		}
 
-		var raw proto.Message
+		var raw *bytes.Frame
 		if err = c.ReadBody(&raw); err != nil {
 			return nil, err
 		}
 
-		return raw.Marshal()
+		return raw.Data, err
 	case strings.Contains(myCt, "application/www-x-form-urlencoded"), strings.Contains(myCt, "application/x-www-form-urlencoded"):
 		if err := r.ParseForm(); err != nil {
 			return nil, err

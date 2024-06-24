@@ -7,13 +7,13 @@ import (
 	"reflect"
 	"testing"
 
-	go_api "github.com/smart-echo/micro/api/proto"
+	pb "github.com/smart-echo/micro/proto/api/v1"
 	"google.golang.org/protobuf/proto"
 )
 
 func TestRequestPayloadFromRequest(t *testing.T) {
 	// our test event so that we can validate serializing / deserializing of true protos works
-	protoEvent := go_api.Event{
+	protoEvent := pb.Event{
 		Name: "Test",
 	}
 
