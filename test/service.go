@@ -1,4 +1,5 @@
 // Package test implements a testing framework, and provides default tests.
+
 package test
 
 import (
@@ -49,6 +50,7 @@ type ServiceTestConfig struct {
 	// It takes in a list of options, which by default will Context and an
 	// AfterStart with channel to signal when the service has been started.
 	NewService func(name string, opts ...micro.Option) (micro.Service, error)
+
 	// Parallel is the number of parallel routines to use for the tests.
 	Parallel []int
 	// Sequential is the number of sequential requests to send per parallel process.

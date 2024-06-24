@@ -60,6 +60,7 @@ func (c *fc) GetBlock(sessionId, blockId int64) ([]byte, error) {
 
 func (c *fc) ReadAt(sessionId, offset, size int64) ([]byte, error) {
 	rsp, err := c.c.Read(context.TODO(), &pb.ReadRequest{Id: sessionId, Size: size, Offset: offset})
+
 	if err != nil {
 		return nil, err
 	}
