@@ -9,7 +9,7 @@ import (
 
 	"dario.cat/mergo"
 	"github.com/smart-echo/micro/config/source"
-	"github.com/smart-echo/micro/util/cmd"
+	"github.com/smart-echo/micro/cmd"
 	"github.com/urfave/cli/v2"
 )
 

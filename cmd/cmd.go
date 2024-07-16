@@ -149,7 +149,7 @@ var (
 		},
 		&cli.StringFlag{
 			Name:    "runtime",
-			Usage:   "Runtime for building and running services e.g local, kubernetes",
+			Usage:   "Runtime for building and running services e.g local",
 			EnvVars: []string{"MICRO_RUNTIME"},
 		},
 		&cli.StringFlag{

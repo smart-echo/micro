@@ -19,7 +19,7 @@ import (
 	"github.com/smart-echo/micro/server"
 	"github.com/smart-echo/micro/store"
 	"github.com/smart-echo/micro/transport"
-	"github.com/smart-echo/micro/util/cmd"
+	"github.com/smart-echo/micro/cmd"
 )
 
 // Options for micro service.

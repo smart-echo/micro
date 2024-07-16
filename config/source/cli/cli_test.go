@@ -8,7 +8,7 @@ import (
 	"github.com/smart-echo/micro"
 	"github.com/smart-echo/micro/config"
 	"github.com/smart-echo/micro/config/source"
-	"github.com/smart-echo/micro/util/cmd"
+	"github.com/smart-echo/micro/cmd"
 	"github.com/urfave/cli/v2"
 )
 

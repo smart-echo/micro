@@ -10,7 +10,7 @@ import (
 	log "github.com/smart-echo/micro/logger"
 	"github.com/smart-echo/micro/server"
 	"github.com/smart-echo/micro/store"
-	"github.com/smart-echo/micro/util/cmd"
+	"github.com/smart-echo/micro/cmd"
 	signalutil "github.com/smart-echo/micro/util/signal"
 )
 
