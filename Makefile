@@ -5,7 +5,7 @@ init:
 	@go install github.com/bufbuild/buf/cmd/buf@latest
 	@go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 	@go get -u google.golang.org/protobuf/proto
-	@go install github.com/go-micro/generator/cmd/protoc-gen-micro@latest
+	@go install github.com/smart-echo/micro-toolkit/cmd/protoc-gen-micro@latest
 
 .PHONY: proto
 proto:
