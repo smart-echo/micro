@@ -11,23 +11,32 @@ import (
 
 	"github.com/smart-echo/micro/codec/json"
 	protoCodec "github.com/smart-echo/micro/codec/proto"
-	"google.golang.org/protobuf/encoding/prototext"
-	"google.golang.org/protobuf/reflect/protoreflect"
+	internalv1 "github.com/smart-echo/micro/proto/intern/v1"
 )
 
-// protoStruct implements proto.Message.
-type protoStruct struct {
-	Payload string `protobuf:"bytes,1,opt,name=service,proto3" json:"service,omitempty"`
-}
+// // protoStruct implements proto.Message.
+// type protoStruct struct {
+// 	Payload string `protobuf:"bytes,1,opt,name=service,proto3" json:"service,omitempty"`
+// }
 
-func (m *protoStruct) Reset() { *m = protoStruct{} }
-func (m *protoStruct) String() string {
-	b, _ := prototext.Marshal(m)
-	return string(b)
-}
-func (*protoStruct) ProtoReflect() protoreflect.Message {
-	return nil
-}
+// func (x *protoStruct) Reset() {
+// 	*x = protoStruct{}
+// }
+
+// func (x *protoStruct) String() string {
+// 	return protoimpl.X.MessageStringOf(x)
+// }
+
+// func (*protoStruct) ProtoMessage() {}
+
+// func (x *protoStruct) ProtoReflect() protoreflect.Message {
+// 	return x.ProtoReflect().Descriptor().ParentFile().Options().ProtoReflect().New()
+// }
+
+// // Deprecated: Use Abc.ProtoReflect.Descriptor instead.
+// func (*protoStruct) Descriptor() ([]byte, []int) {
+// 	return []byte{}, []int{2}
+// }
 
 // safeBuffer throws away everything and wont Read data back.
 type safeBuffer struct {
@@ -116,7 +125,7 @@ func TestRPCStream_Concurrency(t *testing.T) {
 
 		go func() {
 			for i := 0; i < 50; i++ {
-				msg := protoStruct{Payload: "test"}
+				msg := internalv1.ProtoStruct{Payload: "test"}
 				<-time.After(time.Duration(rand.Intn(50)) * time.Millisecond)
 				if err := streamServer.Send(msg); err != nil {
 					t.Errorf("Unexpected Send error: %s", err)
@@ -128,7 +137,8 @@ func TestRPCStream_Concurrency(t *testing.T) {
 		go func() {
 			for i := 0; i < 50; i++ {
 				<-time.After(time.Duration(rand.Intn(50)) * time.Millisecond)
-				if err := streamServer.Recv(&protoStruct{}); err != nil {
+				msg := &internalv1.ProtoStruct{}
+				if err := streamServer.Recv(msg); err != nil {
 					t.Errorf("Unexpected Recv error: %s", err)
 				}
 			}

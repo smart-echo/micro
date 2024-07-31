@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message ProtoStruct {
+  string Payload = 1;
+}
