@@ -207,6 +207,7 @@ func (s *rpcServer) ServeConn(sock transport.Socket) {
 		if !ok && stream && msg.Header[headers.Error] == errLastStreamResponse.Error() {
 			closeConn = true
 			pool.Release(psock)
+
 			continue
 		}
 
