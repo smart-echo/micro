@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package micro.runtime;
+
+import "proto/runtime/v1/message.proto";
+
+// Source service is used by the CLI to upload source to the service. The service will return
+// a unique ID representing the location of that source. This ID can then be used as a source
+// for the service when doing Runtime.Create. The server will handle cleanup of uploaded source.
+service SourceService {
+  rpc Upload(stream UploadRequest) returns (UploadResponse) {}
+}
+
+message UploadRequest {
+  Service service = 1;
+  bytes data = 2;
+}
+
+message UploadResponse {
+  string id = 1;
+}

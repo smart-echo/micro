@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package micro.runtime;
+
+import "proto/runtime/v1/message.proto";
+
+// Build service is used by containers to download prebuilt binaries. The client will pass the
+// service (name and version are required attributed) and the server will then stream the latest
+// binary to the client.
+service BuildService {
+  rpc Download(Service) returns (stream DownloadResponse) {}
+}
+
+message DownloadResponse {
+  bytes data = 1;
+}

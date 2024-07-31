@@ -1,11 +1,6 @@
 syntax = "proto3";
 
-package debug;
-
-option go_package = "./proto;debug";
-
-// Compile this proto by running the following command in the debug directory:
-// protoc --proto_path=. --micro_out=. --go_out=:. proto/debug.proto
+package micro.debug;
 
 service Debug {
   rpc Log(LogRequest) returns (stream Record) {};
