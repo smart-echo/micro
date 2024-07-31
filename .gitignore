@@ -1,7 +1,7 @@
 # Develop tools
 /.vscode/
 /.idea/
-/vendor/
+vendor/
 
 # Binaries for programs and plugins
 *.exe

@@ -11,7 +11,6 @@ import (
 
 import (
 	context "context"
-	api "github.com/smart-echo/micro/api"
 	client "github.com/smart-echo/micro/client"
 	server "github.com/smart-echo/micro/server"
 )
@@ -22,16 +21,9 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 // Reference imports to suppress errors if they are not otherwise used.
-var _ api.Endpoint
 var _ context.Context
 var _ client.Option
 var _ server.Option
-
-// Api Endpoints for Debug service
-
-func NewDebugEndpoints() []*api.Endpoint {
-	return []*api.Endpoint{}
-}
 
 // Client API for Debug service
 

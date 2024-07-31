@@ -12,7 +12,6 @@ import (
 
 import (
 	context "context"
-	api "github.com/smart-echo/micro/api"
 	client "github.com/smart-echo/micro/client"
 	server "github.com/smart-echo/micro/server"
 )
@@ -23,35 +22,9 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 // Reference imports to suppress errors if they are not otherwise used.
-var _ api.Endpoint
 var _ context.Context
 var _ client.Option
 var _ server.Option
-
-// Api Endpoints for Test service
-
-func NewTestEndpoints() []*api.Endpoint {
-	return []*api.Endpoint{
-		{
-			Name:    "Test.Call",
-			Path:    []string{"/api/v0/test/call/{uuid}"},
-			Method:  []string{"POST"},
-			Handler: "rpc",
-		},
-		{
-			Name:    "Test.CallPcre",
-			Path:    []string{"^/api/v0/test/call/pcre/?$"},
-			Method:  []string{"POST"},
-			Handler: "rpc",
-		},
-		{
-			Name:    "Test.CallPcreInvalid",
-			Path:    []string{"^/api/v0/test/call/pcre/invalid/?"},
-			Method:  []string{"POST"},
-			Handler: "rpc",
-		},
-	}
-}
 
 // Client API for Test service
 
@@ -121,24 +94,6 @@ func RegisterTestHandler(s server.Server, hdlr TestHandler, opts ...server.Handl
 		test
 	}
 	h := &testHandler{hdlr}
-	opts = append(opts, api.WithEndpoint(&api.Endpoint{
-		Name:    "Test.Call",
-		Path:    []string{"/api/v0/test/call/{uuid}"},
-		Method:  []string{"POST"},
-		Handler: "rpc",
-	}))
-	opts = append(opts, api.WithEndpoint(&api.Endpoint{
-		Name:    "Test.CallPcre",
-		Path:    []string{"^/api/v0/test/call/pcre/?$"},
-		Method:  []string{"POST"},
-		Handler: "rpc",
-	}))
-	opts = append(opts, api.WithEndpoint(&api.Endpoint{
-		Name:    "Test.CallPcreInvalid",
-		Path:    []string{"^/api/v0/test/call/pcre/invalid/?"},
-		Method:  []string{"POST"},
-		Handler: "rpc",
-	}))
 	return s.Handle(s.NewHandler(&Test{h}, opts...))
 }
 
